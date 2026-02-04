@@ -71,11 +71,11 @@ class AssetRowWidget(QWidget):
 class WalletWidget(QWidget):
     """钱包主界面（原生风格）"""
 
-    def __init__(self):
+    def __init__(self, row):
         super().__init__()
         self.setWindowTitle("Tron 钱包")
         self.resize(520, 360)
-
+        self.row = row
         self.assets = [
             {"symbol": "TRX", "balance": "0.0000"},
             {"symbol": "USDT", "balance": "0.0000"},
@@ -89,6 +89,20 @@ class WalletWidget(QWidget):
         main_layout = QVBoxLayout(self)
         main_layout.setContentsMargins(12, 12, 12, 12)
         main_layout.setSpacing(10)
+
+        # 顶部栏（原生 QLabel + QPushButton）
+        top_layout = QHBoxLayout()
+        self.title = QLabel(f"钱包地址 {self.row.get("address", "")}")
+        self.btn_refresh = QPushButton("刷新")
+        self.btn_refresh.setIcon(qta.icon("mdi6.refresh"))
+        self.btn_refresh.clicked.connect(self.refresh_assets)
+
+        top_layout.addWidget(self.title)
+        top_layout.addStretch()
+        top_layout.addWidget(self.btn_refresh)
+
+        main_layout.addLayout(top_layout)
+
         # 列表
         self.list_widget = QListWidget()
         self.list_widget.setSelectionMode(QListWidget.NoSelection)  # 不可选中

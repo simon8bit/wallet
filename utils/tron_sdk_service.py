@@ -69,10 +69,10 @@ class TronService:
         return result
 
 
-from_address = "THzUm9MKDkNQLFHqeTAVsuAsTnhczTSxKv"
-to_address = "TUreh7oeV11TC7Ar3hJdd5kLkHGZGYQVki"
-private_key_hex = "3d30bdcfbefcb058ea1f73be6c15543f641223ce2b1879665f8ff68256a47734"
-amount = 1000
-print(TronService.transfer_trx(from_address, to_address, private_key_hex, amount))
-TronService.get_balance("THzUm9MKDkNQLFHqeTAVsuAsTnhczTSxKv")
-TronService.get_balance("TUreh7oeV11TC7Ar3hJdd5kLkHGZGYQVki")
+# from_address = "THzUm9MKDkNQLFHqeTAVsuAsTnhczTSxKv"
+# to_address = "TUreh7oeV11TC7Ar3hJdd5kLkHGZGYQVki"
+# private_key_hex = "3d30bdcfbefcb058ea1f73be6c15543f641223ce2b1879665f8ff68256a47734"
+# amount = 1000
+# print(TronService.transfer_trx(from_address, to_address, private_key_hex, amount))
+# TronService.get_balance("THzUm9MKDkNQLFHqeTAVsuAsTnhczTSxKv")
+# TronService.get_balance("TUreh7oeV11TC7Ar3hJdd5kLkHGZGYQVki")

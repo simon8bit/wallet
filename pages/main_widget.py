@@ -30,10 +30,11 @@ class MainWidget(QWidget):
 
     def __init__(self, username=None):
         super().__init__()
+
         self.username = username
         self.w = None
         self.setWindowTitle("Tron 钱包")
-        self.data = []
+        self.rows = []
         self.setup_ui()
 
     def setup_ui(self):
@@ -116,18 +117,18 @@ class MainWidget(QWidget):
     def load_data(self):
         """加载示例数据"""
         wallets = DBService.list_wallets()
-        print(wallets)
+        self.rows = wallets
         self.table_widget.setRowCount(len(wallets))
 
-        for row, data in enumerate(wallets):
+        for index, data in enumerate(wallets):
             # 地址
             item_addr = QTableWidgetItem(data["address"])
-            self.table_widget.setItem(row, 0, item_addr)
+            self.table_widget.setItem(index, 0, item_addr)
 
             # 创建时间
             item_time = QTableWidgetItem(data["created_at"])
             item_time.setTextAlignment(Qt.AlignCenter)
-            self.table_widget.setItem(row, 1, item_time)
+            self.table_widget.setItem(index, 1, item_time)
 
             # 操作按钮
             button_widget = QWidget()
@@ -136,21 +137,18 @@ class MainWidget(QWidget):
             button_layout.setSpacing(0)
 
             action_button = QPushButton("连接")
-            action_button.clicked.connect(partial(self.handle_row_action, row))
+            action_button.clicked.connect(partial(self.handle_row_action, index))
 
             button_layout.addWidget(action_button, alignment=Qt.AlignCenter)
-            self.table_widget.setCellWidget(row, 2, button_widget)
+            self.table_widget.setCellWidget(index, 2, button_widget)
 
-    def handle_row_action(self, row):
+    def handle_row_action(self, index):
         """处理行操作按钮点击"""
-        self.w = WalletWidget()
+        row = self.rows[index]
+        self.w = WalletWidget(row)
         self.w.show()
-        print(f"点击了第 {row + 1} 行的操作按钮")
 
     def handle_logout(self):
         """处理退出登录"""
         self.logout_requested.emit()
         self.close()
-
-    def get_data(self):
-        self.data = []
