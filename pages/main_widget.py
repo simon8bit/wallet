@@ -47,12 +47,12 @@ class MainWidget(QWidget):
         toolbar.setToolButtonStyle(Qt.ToolButtonTextBesideIcon)  # 图标+文字
 
         # Action: 新建
-        act_new = QAction(qta.icon('mdi6.wallet-plus-outline',color="#1e90ff"), "新建", self)
+        act_new = QAction(qta.icon('mdi6.plus-circle',color="#1e90ff"), "新建", self)
         act_new.setStatusTip("新建钱包")
         act_new.triggered.connect(lambda: self.show_msg("点击了：12新建"))
         toolbar.addAction(act_new)
 
-        act_exp = QAction(qta.icon('mdi6.wallet-plus-outline',color="#1e90ff"), "导出", self)
+        act_exp = QAction(qta.icon('mdi6.file-export-outline',color="#1e90ff"), "导出", self)
         act_exp.setStatusTip("导出钱包")
         act_exp.triggered.connect(lambda: self.show_msg("点击了：12新建"))
         toolbar.addAction(act_exp)
