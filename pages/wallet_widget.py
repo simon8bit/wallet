@@ -6,6 +6,7 @@ from PySide6.QtWidgets import (
     QMessageBox
 )
 import qtawesome as qta
+from service.async_get_balance import AsyncRequestBalance
 
 
 class AssetRowWidget(QWidget):
@@ -81,9 +82,17 @@ class WalletWidget(QWidget):
             {"symbol": "USDT", "balance": "0.0000"},
             {"symbol": "HE", "balance": "0.0000"},
         ]
-
+        self.req_thread = AsyncRequestBalance(self.row.get("address"))
+        self.req_thread.success.connect(self.on_load_success)
+        self.req_thread.error.connect(self.on_load_error)
         self.setup_ui()
         self.load_assets()
+
+    def on_load_success(self, result):
+        print(f"result:{result}")
+
+    def on_load_error(self, result):
+        print(f"result:{result}")
 
     def setup_ui(self):
         main_layout = QVBoxLayout(self)
