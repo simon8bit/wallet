@@ -11,6 +11,7 @@ from PySide6.QtWidgets import QApplication
 from PySide6.QtGui import QFont
 from pages.login_widget import LoginWidget
 from pages.main_widget import MainWidget
+from service.db_server import DBService
 
 
 def main():
@@ -57,4 +58,5 @@ def main():
 
 
 if __name__ == '__main__':
+    DBService.create_table()
     main()

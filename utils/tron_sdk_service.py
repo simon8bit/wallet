@@ -20,7 +20,7 @@ class TronService:
     client = Tron(provider=provider)
 
     @staticmethod
-    def create_wallet():
+    def generate_wallet():
 
         private = PrivateKey.random()
         address = private.public_key.to_base58check_address()

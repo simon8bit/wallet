@@ -20,6 +20,9 @@ from PySide6.QtCore import Qt, Signal, QSize
 from pages.wallet_widget import WalletWidget
 import qtawesome as qta
 
+from service.db_server import DBService
+from utils.tron_sdk_service import TronService
+
 
 class MainWidget(QWidget):
     """主页面"""
@@ -47,12 +50,12 @@ class MainWidget(QWidget):
         toolbar.setToolButtonStyle(Qt.ToolButtonTextBesideIcon)  # 图标+文字
 
         # Action: 新建
-        act_new = QAction(qta.icon('mdi6.plus-circle',color="#1e90ff"), "新建", self)
+        act_new = QAction(qta.icon('mdi6.plus-circle', color="#1e90ff"), "新建", self)
         act_new.setStatusTip("新建钱包")
-        act_new.triggered.connect(lambda: self.show_msg("点击了：12新建"))
+        act_new.triggered.connect(lambda: self.create_wallet())
         toolbar.addAction(act_new)
 
-        act_exp = QAction(qta.icon('mdi6.file-export-outline',color="#1e90ff"), "导出", self)
+        act_exp = QAction(qta.icon('mdi6.file-export-outline', color="#1e90ff"), "导出", self)
         act_exp.setStatusTip("导出钱包")
         act_exp.triggered.connect(lambda: self.show_msg("点击了：12新建"))
         toolbar.addAction(act_exp)
@@ -65,7 +68,7 @@ class MainWidget(QWidget):
         toolbar.addWidget(spacer)
 
         # 退出按钮
-        act_logout = QAction(qta.icon('mdi6.exit-to-app',color="#1e90ff"), "退出", self)
+        act_logout = QAction(qta.icon('mdi6.exit-to-app', color="#1e90ff"), "退出", self)
         act_logout.setStatusTip("退出登录")
         act_logout.triggered.connect(self.handle_logout)
         toolbar.addAction(act_logout)
@@ -84,7 +87,6 @@ class MainWidget(QWidget):
         self.table_widget.setAlternatingRowColors(True)
         self.table_widget.setSelectionMode(QAbstractItemView.NoSelection)
 
-
         # 列宽和拖动
         header = self.table_widget.horizontalHeader()
         header.setSectionsMovable(True)
@@ -98,29 +100,32 @@ class MainWidget(QWidget):
         layout.addWidget(self.table_widget)
 
         # 加载示例数据
-        self.load_sample_data()
+        self.load_data()
+
+    def create_wallet(self):
+        data = TronService.generate_wallet()
+        address = data.get("address")
+        private_key = data.get("private_key")
+        DBService.create_wallet(address, private_key)
+        self.load_data()
+        QMessageBox.information(self, "提示", "success")
 
     def show_msg(self, text):
         QMessageBox.information(self, "提示", text)
 
-    def load_sample_data(self):
+    def load_data(self):
         """加载示例数据"""
-        sample_data = [
-            {"address": "TXYZabcdefghijklmnopqrstuvwxyz123456", "create_time": "2024-01-15 10:30:00"},
-            {"address": "TABCdefghijklmnopqrstuvwxyz987654", "create_time": "2024-01-16 09:15:00"},
-            {"address": "TJKLMnopqrstuvwxyzabcdefghijklmno012", "create_time": "2024-01-19 08:00:00"},
-            {"address": "TZZZzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz", "create_time": "2024-01-20 18:15:00"}
-        ]
+        wallets = DBService.list_wallets()
+        print(wallets)
+        self.table_widget.setRowCount(len(wallets))
 
-        self.table_widget.setRowCount(len(sample_data))
-
-        for row, data in enumerate(sample_data):
+        for row, data in enumerate(wallets):
             # 地址
             item_addr = QTableWidgetItem(data["address"])
             self.table_widget.setItem(row, 0, item_addr)
 
             # 创建时间
-            item_time = QTableWidgetItem(data["create_time"])
+            item_time = QTableWidgetItem(data["created_at"])
             item_time.setTextAlignment(Qt.AlignCenter)
             self.table_widget.setItem(row, 1, item_time)
 

@@ -1,94 +1,65 @@
 import sys
-from PySide6.QtCore import Qt
-
+from PySide6.QtCore import Qt, QSize
 from PySide6.QtWidgets import (
     QApplication, QWidget, QLabel, QPushButton,
-    QVBoxLayout, QHBoxLayout, QListWidget,
+    QVBoxLayout, QHBoxLayout, QListWidget, QListWidgetItem,
     QMessageBox
 )
 import qtawesome as qta
 
 
 class AssetRowWidget(QWidget):
-    """每一行资产：币种 + 余额 + 转账按钮 + 记录按钮"""
+    """每一行资产：币种 + 余额 + 转账按钮 + 记录按钮（原生风格）"""
 
     def __init__(self, symbol: str, balance: str, parent=None):
         super().__init__(parent)
         self.symbol = symbol
         self.balance = balance
 
-        # ------------------------
-        # 主布局
-        # ------------------------
         layout = QHBoxLayout(self)
-        layout.setContentsMargins(16, 10, 16, 10)
-        layout.setSpacing(12)
+        layout.setContentsMargins(12, 8, 12, 8)
+        layout.setSpacing(10)
 
-        # ------------------------
-        # 左侧：币种图标 + 名称
-        # ------------------------
+        # 图标
         self.icon_label = QLabel()
         icon_map = {
-            "TRX": "mdi6.wallet-plus-outline",
-            "HE": "mdi6.wallet-plus-outline",
-            "USDT": "mdi6.wallet-plus-outline"
+            "TRX": "mdi6.lightning-bolt",
+            "HE": "mdi6.wallet-outline",
+            "USDT": "mdi6.currency-usd"
         }
         icon_name = icon_map.get(symbol, "mdi6.currency-usd")
-        self.icon_label.setPixmap(qta.icon(icon_name, color="#ff8c00").pixmap(24, 24))
+        self.icon_label.setPixmap(qta.icon(icon_name).pixmap(22, 22))
 
+        # 币种名
         self.lbl_symbol = QLabel(symbol)
-        self.lbl_symbol.setStyleSheet("font-weight: bold; font-size: 14px; color: #333333;")
+        self.lbl_symbol.setMinimumWidth(60)
 
-        symbol_layout = QHBoxLayout()
-        symbol_layout.addWidget(self.icon_label)
-        symbol_layout.addWidget(self.lbl_symbol)
-        symbol_layout.addStretch()
-
-        # ------------------------
-        # 中间：余额
-        # ------------------------
+        # 余额
         self.lbl_balance = QLabel(balance)
         self.lbl_balance.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
-        self.lbl_balance.setStyleSheet("font-size: 14px; color: #1a1a1a; font-weight: 500;")
 
-        # ------------------------
-        # 右侧按钮：转账、记录
-        # ------------------------
+        # 按钮
         self.btn_transfer = QPushButton("转账")
-        self.btn_history = QPushButton("记录")
-        btn_icons = {
-            self.btn_transfer: "mdi6.arrow-top-right",
-            self.btn_history: "mdi6.history"
-        }
+        self.btn_transfer.setIcon(qta.icon("mdi6.send"))
+        self.btn_transfer.setIconSize(QSize(16, 16))
 
-        for btn in (self.btn_transfer, self.btn_history):
-            btn.setCursor(Qt.PointingHandCursor)
-            btn.setFixedHeight(30)
-            btn.setIcon(qta.icon(btn_icons[btn], color="#1e90ff"))
-            # btn.setStyleSheet("""
-            #     QPushButton {
-            #         border: 1px solid #1e90ff;
-            #         color: #1e90ff;
-            #         border-radius: 6px;
-            #         padding: 4px 12px;
-            #         font-size: 13px;
-            #     }
-            #     QPushButton:hover {
-            #         background-color: #1e90ff;
-            #         color: white;
-            #     }
-            # """)
+        self.btn_history = QPushButton("记录")
+        self.btn_history.setIcon(qta.icon("mdi6.history"))
+        self.btn_history.setIconSize(QSize(16, 16))
 
         self.btn_transfer.clicked.connect(self.on_transfer)
         self.btn_history.clicked.connect(self.on_history)
 
-        # ------------------------
-        # 添加到主布局
-        # ------------------------
-        layout.addLayout(symbol_layout)
+        # 布局
+        layout.addWidget(self.icon_label)
+        layout.addWidget(self.lbl_symbol)
         layout.addWidget(self.lbl_balance, 1)
         layout.addWidget(self.btn_transfer)
         layout.addWidget(self.btn_history)
+
+    def set_balance(self, balance: str):
+        self.balance = balance
+        self.lbl_balance.setText(balance)
 
     def on_transfer(self):
         QMessageBox.information(self, "转账", f"准备给 {self.symbol} 转账")
@@ -98,35 +69,59 @@ class AssetRowWidget(QWidget):
 
 
 class WalletWidget(QWidget):
-    """钱包主界面"""
+    """钱包主界面（原生风格）"""
 
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Tron 钱包")
-        self.setMinimumSize(400, 260)
-        self.setup_ui()
-        self.center_window()
+        self.resize(520, 360)
 
-    def center_window(self):
-        """窗口居中显示"""
-        from PySide6.QtWidgets import QApplication
-        screen = QApplication.primaryScreen().geometry()
-        size = self.geometry()
-        self.move(
-            (screen.width() - size.width()) // 2,
-            (screen.height() - size.height()) // 2
-        )
+        self.assets = [
+            {"symbol": "TRX", "balance": "0.0000"},
+            {"symbol": "USDT", "balance": "0.0000"},
+            {"symbol": "HE", "balance": "0.0000"},
+        ]
+
+        self.setup_ui()
+        self.load_assets()
 
     def setup_ui(self):
-        """创建界面"""
         main_layout = QVBoxLayout(self)
-        for i in range(3):
-            main_layout.addWidget(QListWidget())
+        main_layout.setContentsMargins(12, 12, 12, 12)
+        main_layout.setSpacing(10)
+        # 列表
+        self.list_widget = QListWidget()
+        self.list_widget.setSelectionMode(QListWidget.NoSelection)  # 不可选中
+        self.list_widget.setSpacing(2)  # 行间距（原生效果）
+
+        main_layout.addWidget(self.list_widget, 1)
+
+    def load_assets(self):
+        self.list_widget.clear()
+
+        for asset in self.assets:
+            row_widget = AssetRowWidget(asset["symbol"], asset["balance"])
+
+            item = QListWidgetItem()
+            item.setSizeHint(row_widget.sizeHint())
+
+            self.list_widget.addItem(item)
+            self.list_widget.setItemWidget(item, row_widget)
+
+    def refresh_assets(self):
+        # 模拟刷新
+        for a in self.assets:
+            if a["symbol"] == "TRX":
+                a["balance"] = "12.3456"
+            elif a["symbol"] == "USDT":
+                a["balance"] = "0.3000"
+            else:
+                a["balance"] = "88.0000"
+
+        self.load_assets()
+        QMessageBox.information(self, "刷新", "余额已刷新（模拟）")
 
 
-# -----------------------------
-# Demo 运行
-# -----------------------------
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     w = WalletWidget()
