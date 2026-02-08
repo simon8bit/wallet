@@ -11,7 +11,6 @@ from PySide6.QtWidgets import QApplication
 from PySide6.QtGui import QFont
 from pages.login_widget import LoginWidget
 from pages.main_widget import MainWidget
-from service.db_server import DBService
 
 
 def main():
@@ -36,7 +35,7 @@ def main():
         nonlocal main_window, login_window
         # 创建主页面
         main_window = MainWidget(username)
-        main_window.setFixedWidth(580)
+        main_window.setFixedWidth(600)
         main_window.show()
         # 关闭登录窗口
         login_window.close()
@@ -50,7 +49,7 @@ def main():
             login_window.show()
             login_window.login_success.connect(on_login_success)
 
-        main_window.logout_requested.connect(on_logout)
+        main_window.logoutRequested.connect(on_logout)
 
     login_window.login_success.connect(on_login_success)
 

@@ -6,12 +6,10 @@
    Version:          3.0
 -------------------------------------------------
 """
-from PySide6.QtGui import QFont
-from PySide6.QtWidgets import (
-    QWidget, QVBoxLayout, QLabel, QPushButton, QLineEdit,
-    QSpacerItem, QSizePolicy
-)
-from PySide6.QtCore import Qt, Signal
+from PySide6.QtCore import Signal
+from PySide6.QtGui import QFont, Qt
+from PySide6.QtWidgets import QWidget, QVBoxLayout, QLabel, QSizePolicy, QSpacerItem
+from qfluentwidgets import (PushButton, LineEdit)
 
 
 class LoginWidget(QWidget):
@@ -60,7 +58,7 @@ class LoginWidget(QWidget):
         # ========================
         # 用户名输入框
         # ========================
-        self.username_input = QLineEdit()
+        self.username_input = LineEdit()
         self.username_input.setPlaceholderText("用户名")
         self.username_input.setMinimumWidth(250)
         self.username_input.setMinimumHeight(32)
@@ -69,9 +67,9 @@ class LoginWidget(QWidget):
         # ========================
         # 密码输入框
         # ========================
-        self.password_input = QLineEdit()
+        self.password_input = LineEdit()
         self.password_input.setPlaceholderText("密码")
-        self.password_input.setEchoMode(QLineEdit.Password)
+        self.password_input.setEchoMode(LineEdit.Password)
         self.password_input.setMinimumWidth(250)
         self.password_input.setMinimumHeight(32)
         self.password_input.returnPressed.connect(self.handle_login)
@@ -80,7 +78,7 @@ class LoginWidget(QWidget):
         # ========================
         # 登录按钮
         # ========================
-        self.login_button = QPushButton("登录")
+        self.login_button = PushButton("登录")
         self.login_button.setMinimumWidth(250)
         self.login_button.setMinimumHeight(36)
         self.login_button.clicked.connect(self.handle_login)
