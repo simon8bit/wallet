@@ -1,5 +1,6 @@
 import sys
 from PySide6.QtCore import Qt, QSize
+from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import (
     QApplication, QWidget, QLabel, QPushButton,
     QVBoxLayout, QHBoxLayout, QListWidget, QListWidgetItem,
@@ -41,12 +42,12 @@ class AssetRowWidget(QWidget):
 
         # 按钮
         self.btn_transfer = QPushButton("转账")
-        self.btn_transfer.setIcon(qta.icon("mdi6.send"))
-        self.btn_transfer.setIconSize(QSize(16, 16))
+        # self.btn_transfer.setIcon(qta.icon("mdi6.send"))
+        # self.btn_transfer.setIconSize(QSize(16, 16))
 
         self.btn_history = QPushButton("记录")
-        self.btn_history.setIcon(qta.icon("mdi6.history"))
-        self.btn_history.setIconSize(QSize(16, 16))
+        # self.btn_history.setIcon(qta.icon("mdi6.history"))
+        # self.btn_history.setIconSize(QSize(16, 16))
 
         self.btn_transfer.clicked.connect(self.on_transfer)
         self.btn_history.clicked.connect(self.on_history)
@@ -77,72 +78,76 @@ class WalletWidget(QWidget):
         self.setWindowTitle("Tron 钱包")
         self.resize(520, 360)
         self.row = row
-        self.assets = [
-            {"symbol": "TRX", "balance": "0.0000"},
-            {"symbol": "USDT", "balance": "0.0000"},
-            {"symbol": "HE", "balance": "0.0000"},
-        ]
         self.req_thread = AsyncRequestBalance(self.row.get("address"))
         self.req_thread.success.connect(self.on_load_success)
         self.req_thread.error.connect(self.on_load_error)
-        self.setup_ui()
-        self.load_assets()
-
-    def on_load_success(self, result):
-        print(f"result:{result}")
-
-    def on_load_error(self, result):
-        print(f"result:{result}")
-
-    def setup_ui(self):
-        main_layout = QVBoxLayout(self)
-        main_layout.setContentsMargins(12, 12, 12, 12)
-        main_layout.setSpacing(10)
-
-        # 顶部栏（原生 QLabel + QPushButton）
-        top_layout = QHBoxLayout()
+        self.req_thread.start()
+        self.label = QLabel("查询错误，请重试")
+        # 总体布局
+        self.main_layout = QVBoxLayout(self)
+        self.main_layout.setContentsMargins(12, 12, 12, 12)
+        self.main_layout.setSpacing(10)
+        # //title控件
         self.title = QLabel(f"钱包地址 {self.row.get("address", "")}")
-        self.btn_refresh = QPushButton("刷新")
-        self.btn_refresh.setIcon(qta.icon("mdi6.refresh"))
+        self.btn_refresh = QPushButton("连接中...")
+        self.btn_refresh.setIcon(QIcon("statics/loading.png"))
+
         self.btn_refresh.clicked.connect(self.refresh_assets)
+        # title的布局
+        self.top_layout = QHBoxLayout()
+        self.top_layout.addWidget(self.title)
+        self.top_layout.addStretch()
+        self.top_layout.addWidget(self.btn_refresh)
 
-        top_layout.addWidget(self.title)
-        top_layout.addStretch()
-        top_layout.addWidget(self.btn_refresh)
+        self.main_layout.addLayout(self.top_layout)
 
-        main_layout.addLayout(top_layout)
-
-        # 列表
         self.list_widget = QListWidget()
         self.list_widget.setSelectionMode(QListWidget.NoSelection)  # 不可选中
         self.list_widget.setSpacing(2)  # 行间距（原生效果）
+        self.main_layout.addWidget(self.list_widget, 1)
+        self.main_layout.addStretch()
 
-        main_layout.addWidget(self.list_widget, 1)
+        self.setup_ui()
 
-    def load_assets(self):
+    def on_load_success(self, result):
+        assets = [
+            {"symbol": "TRX", "balance": "1.0000"},
+            {"symbol": "USDT", "balance": "2.0000"},
+        ]
+        self.load_assets(assets)
+        self.btn_refresh.setText("刷新")
+        self.btn_refresh.setIcon(qta.icon("mdi6.refresh"))
+        print(f"result1:{result}")
+
+    def on_load_error(self, result):
+        assets = [
+            {"symbol": "TRX", "balance": "0.0000"},
+            {"symbol": "USDT", "balance": "0.0000"},
+        ]
+        self.load_assets(assets)
+        self.btn_refresh.setText("刷新")
+        self.btn_refresh.setIcon(qta.icon("mdi6.refresh"))
+        print(f"result2:{result}")
+        QMessageBox.information(
+            self, "请求", result)
+
+    def setup_ui(self):
+        self.label = QLabel("查询错误")
+        # 列表
+
+    def load_assets(self, assets):
         self.list_widget.clear()
-
-        for asset in self.assets:
+        for asset in assets:
             row_widget = AssetRowWidget(asset["symbol"], asset["balance"])
-
             item = QListWidgetItem()
             item.setSizeHint(row_widget.sizeHint())
-
             self.list_widget.addItem(item)
             self.list_widget.setItemWidget(item, row_widget)
 
     def refresh_assets(self):
-        # 模拟刷新
-        for a in self.assets:
-            if a["symbol"] == "TRX":
-                a["balance"] = "12.3456"
-            elif a["symbol"] == "USDT":
-                a["balance"] = "0.3000"
-            else:
-                a["balance"] = "88.0000"
-
-        self.load_assets()
-        QMessageBox.information(self, "刷新", "余额已刷新（模拟）")
+        self.btn_refresh.setText("刷新中...")
+        self.btn_refresh.setIcon(QIcon("statics/loading.png"))
+        self.req_thread.start()
 
 
 if __name__ == "__main__":
