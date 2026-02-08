@@ -14,28 +14,28 @@ from service.db_server import DBService
 from utils.tron_sdk_service import TronService
 
 
-class MainWidget(QWidget):
-    def __init__(self, parent=None):
-        super().__init__(parent)
-        self._border_visible = False
-        self._border_radius = 0
-        self._update_style()
-
-    def setBorderVisible(self, visible: bool):
-        self._border_visible = visible
-        self._update_style()
-
-    def setBorderRadius(self, radius: int):
-        self._border_radius = radius
-        self._update_style()
-
-    def _update_style(self):
-        style = ""
-        if self._border_visible:
-            style += f"border: 1px solid #333;"
-        if self._border_radius > 0:
-            style += f"border-radius: {self._border_radius}px;"
-        self.setStyleSheet(style)
+# class MainWidget(QWidget):
+#     def __init__(self, parent=None):
+#         super().__init__(parent)
+#         self._border_visible = False
+#         self._border_radius = 0
+#         self._update_style()
+#
+#     def setBorderVisible(self, visible: bool):
+#         self._border_visible = visible
+#         self._update_style()
+#
+#     def setBorderRadius(self, radius: int):
+#         self._border_radius = radius
+#         self._update_style()
+#
+#     def _update_style(self):
+#         style = ""
+#         if self._border_visible:
+#             style += f"border: 1px solid #333;"
+#         if self._border_radius > 0:
+#             style += f"border-radius: {self._border_radius}px;"
+#         self.setStyleSheet(style)
 
 
 class MainWidget(QWidget):
