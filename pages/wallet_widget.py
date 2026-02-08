@@ -8,6 +8,7 @@ from PySide6.QtWidgets import (
 )
 import qtawesome as qta
 from service.async_get_balance import AsyncRequestBalance
+import datetime
 
 
 class AssetRowWidget(QWidget):
@@ -76,34 +77,37 @@ class WalletWidget(QWidget):
     def __init__(self, row):
         super().__init__()
         self.setWindowTitle("Tron 钱包")
+        self.setWindowModality(Qt.ApplicationModal)
         self.resize(520, 360)
         self.row = row
         self.req_thread = AsyncRequestBalance(self.row.get("address"))
         self.req_thread.success.connect(self.on_load_success)
         self.req_thread.error.connect(self.on_load_error)
         self.req_thread.start()
-        self.label = QLabel("查询错误，请重试")
+
         # 总体布局
         self.main_layout = QVBoxLayout(self)
-        self.main_layout.setContentsMargins(12, 12, 12, 12)
+        # self.main_layout.setContentsMargins(12, 12, 12, 12)
         self.main_layout.setSpacing(10)
         # //title控件
         self.title = QLabel(f"钱包地址 {self.row.get("address", "")}")
         self.btn_refresh = QPushButton("连接中...")
+        self.btn_refresh.setFixedWidth(80)
+        self.btn_refresh.setStyleSheet("background-color:transparent;")
         self.btn_refresh.setIcon(QIcon("statics/loading.png"))
 
         self.btn_refresh.clicked.connect(self.refresh_assets)
         # title的布局
-        self.top_layout = QHBoxLayout()
-        self.top_layout.addWidget(self.title)
-        self.top_layout.addStretch()
-        self.top_layout.addWidget(self.btn_refresh)
 
-        self.main_layout.addLayout(self.top_layout)
+        self.main_layout.addWidget(self.title)
+        self.refresh_info = QLabel()
+        self.main_layout.addWidget(self.refresh_info)
+        self.main_layout.addWidget(self.btn_refresh)
 
         self.list_widget = QListWidget()
         self.list_widget.setSelectionMode(QListWidget.NoSelection)  # 不可选中
         self.list_widget.setSpacing(2)  # 行间距（原生效果）
+
         self.main_layout.addWidget(self.list_widget, 1)
         self.main_layout.addStretch()
 
@@ -114,6 +118,7 @@ class WalletWidget(QWidget):
             {"symbol": "TRX", "balance": "1.0000"},
             {"symbol": "USDT", "balance": "2.0000"},
         ]
+        self.refresh_info.setText(f"更新时间：{datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
         self.load_assets(assets)
         self.btn_refresh.setText("刷新")
         self.btn_refresh.setIcon(qta.icon("mdi6.refresh"))
@@ -124,6 +129,7 @@ class WalletWidget(QWidget):
             {"symbol": "TRX", "balance": "0.0000"},
             {"symbol": "USDT", "balance": "0.0000"},
         ]
+        self.refresh_info.setText(f"更新时间：{datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
         self.load_assets(assets)
         self.btn_refresh.setText("刷新")
         self.btn_refresh.setIcon(qta.icon("mdi6.refresh"))

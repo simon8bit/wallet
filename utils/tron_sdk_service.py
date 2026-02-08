@@ -32,6 +32,7 @@ class TronService:
     @classmethod
     def get_balance(cls, address):
         account = cls.client.get_account(address)
+        print(f"account: {account}")
         balance = account.get("balance", 0)
         print("Balance:", balance / 1_000_000, "TRX")
         return balance
